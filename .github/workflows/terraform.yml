@@ -1,0 +1,67 @@
+name: Terraform CI/CD
+
+# -------------------------------
+# Triggers
+# -------------------------------
+on:
+  push:
+    branches:
+      - main # Only apply infra on main
+  pull_request:
+    branches:
+      - develop # Plan on PRs from feature branches
+  workflow_dispatch:
+
+# -------------------------------
+# Jobs
+# -------------------------------
+jobs:
+  terraform:
+    name: Terraform Workflow
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      # Use managed identity
+      ARM_USE_MSI: "true"
+      ARM_CLIENT_ID: ${{ secrets.AZURE_UAMI_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    steps:
+      # 1. Checkout the repository to the GitHub Actions runner
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 2. Install the latest version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.6
+
+      # 3. Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        run: terraform init terraform/envs/dev
+
+      # 4. Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format Check
+        run: terraform fmt -check terraform/envs/dev
+
+      # 5. Terraform Validate
+      - name: Terraform Validate
+        run: terraform validate terraform/envs/dev
+
+      # 6. Generates an execution plan for Terraform
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -out=tfplan terraform/envs/dev
+
+      #7.  On push to "main", build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud".
+      # See the documentation on "strict" required status checks for more information:
+      # https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve tfplan
