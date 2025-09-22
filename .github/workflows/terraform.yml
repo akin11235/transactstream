@@ -43,20 +43,20 @@ jobs:
 
       # 3. Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        run: terraform -chdir=terraform/envs/dev init
+        run: terraform -chdir=infra/terraform/envs/dev init
 
       # 4. Checks that all Terraform configuration files adhere to a canonical format
       - name: Terraform Format Check
-        run: terraform -chdir=terraform/envs/dev fmt -check
+        run: terraform -chdir=infra/terraform/envs/dev fmt -check
 
       # 5. Terraform Validate
       - name: Terraform Validate
-        run: terraform -chdir=terraform/envs/dev validate
+        run: terraform -chdir=infra/terraform/envs/dev validate
 
       # 6. Generates an execution plan for Terraform
       - name: Terraform Plan
         id: plan
-        run: terraform -chdir=terraform/envs/dev plan -out=tfplan
+        run: terraform -chdir=infra/terraform/envs/dev plan -out=tfplan
 
       #7.  On push to "main", build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud".
