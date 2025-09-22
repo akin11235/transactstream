@@ -1,5 +1,5 @@
 import pandas as pd
-from data import faker_generate
+from transactstream.faker import faker_generate
 
 def test_generate_transaction_shape():
     # Generate 100 records

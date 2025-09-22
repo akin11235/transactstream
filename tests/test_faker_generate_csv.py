@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from data import faker_generate
+from transactstream.faker import faker_generate
 
 def test_generate_transaction_csv(tmp_path):
     # Use a temporary file path so we don't clutter the repo
