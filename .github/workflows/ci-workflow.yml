@@ -10,9 +10,11 @@ name: CI Workflow
 on:
   push:
     branches:
+      - "develop" # Run workflow on develop pushes
       - "feature/**" # Run workflow on all feature/* branches
   pull_request:
     branches:
+      - "develop" # Run workflow on PRs targeting develop
       - "main" # Run workflow on PRs targeting main branch
 
 # -------------------------------
