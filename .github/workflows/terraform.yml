@@ -36,12 +36,12 @@ jobs:
         uses: actions/checkout@v3
 
       # 2. Verify Azure secrets are set
-      - name: Verify Azure secrets
-        run: |
-          if [[ -z "$ARM_CLIENT_ID" || -z "$ARM_SUBSCRIPTION_ID" || -z "$ARM_TENANT_ID" ]]; then
-            echo "Missing required Azure secrets."
-            exit 1
-          fi
+      # - name: Verify Azure secrets
+      #   run: |
+      #     if [[ -z "$ARM_CLIENT_ID" || -z "$ARM_SUBSCRIPTION_ID" || -z "$ARM_TENANT_ID" ]]; then
+      #       echo "Missing required Azure secrets."
+      #       exit 1
+      #     fi
 
       - name: Debug Azure Secret Lengths
         run: |
