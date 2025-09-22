@@ -10,3 +10,8 @@ scratch/**
 .env
 
 data/financial_transactions.csv
+
+# Terraform local providers and state
+.terraform/
+*.tfstate
+*.tfstate.backup
