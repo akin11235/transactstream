@@ -14,11 +14,3 @@ variable "uami_client_id" {
   description = "Client ID of the user-assigned managed identity"
   type        = string
 }
-
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-}
-
-variable "tenant_id" {
-  description = "Azure Tenant ID"
-}
