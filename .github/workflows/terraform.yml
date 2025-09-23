@@ -28,45 +28,62 @@ jobs:
       ARM_USE_MSI: "true"
       ARM_CLIENT_ID: ${{ secrets.ARM_UAMI_CLIENT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      PATH: /home/azureuser/bin:/usr/bin:$PATH
+      PATH: /usr/bin:$PATH # /usr/bin contains system binaries including global az
 
     steps:
       # 1. Checkout the repository to the GitHub Actions runner
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Test Azure Authentication with Managed Identity
+      # 2. Ensure Azure CLI is installed (non-interactive)
+      - name: Ensure Azure CLI
+        run: |
+          if ! command -v az &> /dev/null; then
+            echo "Azure CLI not found, installing..."
+            # Install Azure CLI globally (Ubuntu)
+            sudo apt-get update -y
+            sudo apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
+            curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft.gpg > /dev/null
+            AZ_REPO=$(lsb_release -cs)
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+            sudo apt-get update -y
+            sudo apt-get install -y azure-cli
+          else
+            echo "Azure CLI already installed: $(az --version | head -n1)"
+          fi
+
+      # 3. Test Azure Authentication with Managed Identity
       - name: Test Azure Authentication
         run: |
           echo "Testing Azure authentication with managed identity..."
           az login --identity --username $ARM_CLIENT_ID
           az account show
 
-      # 3. Install the latest version of Terraform CLI
+      # 4. Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # 4. Initialize Terraform for storage deployment
+      # 5. Initialize Terraform for storage deployment
       - name: Terraform Init
         run: terraform -chdir=infra/terraform/envs/dev init
 
-      # 5. Terraform Format Check for storage deployment
+      # 6. Terraform Format Check for storage deployment
       - name: Terraform Format Check
         run: terraform -chdir=infra/terraform/envs/dev fmt -check
         continue-on-error: true # Don't fail build for formatting issues
 
-      # 6. Terraform Validate for storage deployment
+      # 7. Terraform Validate for storage deployment
       - name: Terraform Validate
         run: terraform -chdir=infra/terraform/envs/dev validate
 
-      # 7. Terraform Plan for storage deployment
+      # 8. Terraform Plan for storage deployment
       - name: Terraform Plan
         id: plan
         run: terraform -chdir=infra/terraform/envs/dev plan -out=tfplan
 
-      #8. Terraform Apply for storage deployment (only on main branch)
+      #9. Terraform Apply for storage deployment (only on main branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform -chdir=infra/terraform/envs/dev apply -auto-approve tfplan #gating condition to apply changes only when main is updated
