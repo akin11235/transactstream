@@ -34,20 +34,30 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Test Azure Authentication with Managed Identity
+      # 2. Install Azure CLI (if not already installed)
+      - name: Install Azure CLI
+        run: |
+          if ! command -v az &> /dev/null; then
+            echo "Azure CLI not found, installing..."
+            curl -sL https://aka.ms/InstallAzureCLI | sudo bash
+          else
+            echo "Azure CLI already installed: $(az --version | head -n1)"
+          fi
+
+      # 3. Test Azure Authentication with Managed Identity
       - name: Test Azure Authentication
         run: |
           echo "Testing Azure authentication with managed identity..."
           az login --identity --username $ARM_CLIENT_ID
           az account show
 
-      # 3. Install the latest version of Terraform CLI
+      # 4. Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # 4. Initialize Terraform for storage deployment
+      # 5. Initialize Terraform for storage deployment
       - name: Terraform Init
         run: terraform -chdir=infra/terraform/envs/dev init
 
