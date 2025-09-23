@@ -28,6 +28,7 @@ jobs:
       ARM_USE_MSI: "true"
       ARM_CLIENT_ID: ${{ secrets.ARM_UAMI_CLIENT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      PATH: $HOME/lib/azure-cli/bin:$PATH
 
     steps:
       # 1. Checkout the repository to the GitHub Actions runner
