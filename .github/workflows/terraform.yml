@@ -39,7 +39,7 @@ jobs:
         run: |
           if ! command -v az &> /dev/null; then
             echo "Azure CLI not found, installing..."
-            curl -sL https://aka.ms/InstallAzureCLI | sudo bash
+            curl -sL https://aka.ms/InstallAzureCLI | sudo bash -s -- --yes
           else
             echo "Azure CLI already installed: $(az --version | head -n1)"
           fi
